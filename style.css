@@ -1,0 +1,198 @@
+/* ========================================
+   DEAN FINANCE TERMINAL
+   V1.0
+   ======================================== */
+
+
+/* ---------- 基本設定 ---------- */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+
+    font-family:
+        Arial,
+        "Microsoft JhengHei",
+        sans-serif;
+
+    background: #0f1117;
+    color: #e6e8ec;
+
+    line-height: 1.6;
+}
+
+
+/* ---------- 頁首 ---------- */
+
+header {
+    padding: 24px 40px;
+
+    background: #151923;
+
+    border-bottom: 1px solid #2a2f3a;
+}
+
+header h1 {
+    margin: 0;
+
+    font-size: 28px;
+    letter-spacing: 2px;
+}
+
+header p {
+    margin: 4px 0 0;
+
+    color: #8b93a1;
+    font-size: 14px;
+}
+
+
+/* ---------- 主畫面 ---------- */
+
+main {
+    max-width: 1400px;
+
+    margin: 0 auto;
+
+    padding: 30px 40px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 24px;
+}
+
+
+/* ---------- 每一個區塊 ---------- */
+
+section {
+    background: #171b24;
+
+    border: 1px solid #292f3b;
+
+    border-radius: 10px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+
+/* ---------- 標題 ---------- */
+
+section h2 {
+    margin-top: 0;
+
+    padding-bottom: 12px;
+
+    font-size: 18px;
+
+    border-bottom: 1px solid #292f3b;
+}
+
+
+/* ---------- 台股 ---------- */
+
+#taiwan-stocks {
+    min-height: 120px;
+
+    color: #9aa3b2;
+}
+
+
+/* ---------- 國際市場 ---------- */
+
+#global-market {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+#global-market p {
+    margin: 0;
+
+    padding: 10px;
+
+    background: #11151d;
+
+    border-radius: 6px;
+}
+
+
+/* ---------- 我的資產 ---------- */
+
+#portfolio {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+}
+
+#portfolio p {
+    margin: 0;
+
+    padding: 16px;
+
+    text-align: center;
+
+    background: #11151d;
+
+    border-radius: 6px;
+}
+
+
+/* ---------- AI Morning Brief ---------- */
+
+#morning-brief {
+    min-height: 180px;
+
+    padding: 16px;
+
+    background: #11151d;
+
+    border-radius: 6px;
+
+    color: #aeb5c2;
+}
+
+
+/* ---------- 頁尾 ---------- */
+
+footer {
+    padding: 20px;
+
+    text-align: center;
+
+    color: #626b7a;
+
+    font-size: 12px;
+}
+
+
+/* ---------- RWD ---------- */
+
+/* 螢幕較窄時改成單欄 */
+
+@media (max-width: 800px) {
+
+    main {
+        grid-template-columns: 1fr;
+
+        padding: 20px;
+    }
+
+    #portfolio {
+        grid-template-columns: 1fr;
+    }
+
+}
