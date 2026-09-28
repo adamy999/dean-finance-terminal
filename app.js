@@ -1,35 +1,51 @@
 // ========================================
 // DEAN FINANCE TERMINAL
-// JavaScript V1.0
-// 台股自選股：新增 / 刪除
+// JavaScript V2.0
+// 台股自選股：JSON + 新增 / 刪除
 // ========================================
 
-// 預設自選股
-const defaultStocks = [
-    {
-        code: "2330",
-        name: "台積電"
-    },
-    {
-        code: "3037",
-        name: "欣興"
-    },
-    {
-        code: "2303",
-        name: "聯電"
+
+// ========================================
+// 初始資料
+// ========================================
+
+let stocks = [];
+
+
+// ========================================
+// 從 JSON 載入自選股
+// ========================================
+
+async function loadStocks() {
+
+    try {
+
+        const response = await fetch("data/watchlist.json");
+
+        if (!response.ok) {
+            throw new Error("無法讀取 watchlist.json");
+        }
+
+        const data = await response.json();
+
+        stocks = data.taiwan || [];
+
+        renderStocks();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("自選股資料載入失敗");
+
     }
-];
-
-
-// 從瀏覽器記憶中讀取自選股
-let stocks = JSON.parse(
-    localStorage.getItem("deanTaiwanStocks")
-) || defaultStocks;
+}
 
 
 // ========================================
-// 儲存資料
+// 儲存資料到瀏覽器
 // ========================================
+
 function saveStocks() {
 
     localStorage.setItem(
@@ -40,18 +56,47 @@ function saveStocks() {
 
 
 // ========================================
+// 從瀏覽器記憶中讀取
+// ========================================
+
+function loadLocalStocks() {
+
+    const saved = localStorage.getItem(
+        "deanTaiwanStocks"
+    );
+
+    if (saved) {
+
+        stocks = JSON.parse(saved);
+
+        return true;
+
+    }
+
+    return false;
+}
+
+
+// ========================================
 // 顯示台股自選股
 // ========================================
+
 function renderStocks() {
 
-    const container = document.getElementById("taiwan-stocks");
+    const container = document.getElementById(
+        "taiwan-stocks"
+    );
+
+    if (!container) return;
 
     container.innerHTML = "";
 
 
     // 標題
     const title = document.createElement("h3");
+
     title.textContent = "我的自選股";
+
     container.appendChild(title);
 
 
@@ -75,23 +120,28 @@ function renderStocks() {
             stock.code + "  " + stock.name;
 
 
-        const deleteButton = document.createElement("button");
+        const deleteButton =
+            document.createElement("button");
 
         deleteButton.textContent = "刪除";
 
 
-        deleteButton.addEventListener("click", function() {
+        deleteButton.addEventListener(
+            "click",
+            function() {
 
-            stocks.splice(index, 1);
+                stocks.splice(index, 1);
 
-            saveStocks();
+                saveStocks();
 
-            renderStocks();
+                renderStocks();
 
-        });
+            }
+        );
 
 
         row.appendChild(text);
+
         row.appendChild(deleteButton);
 
         container.appendChild(row);
@@ -99,60 +149,73 @@ function renderStocks() {
     });
 
 
-    // ================================
-    // 新增股票區
-    // ================================
+    // ====================================
+    // 新增股票
+    // ====================================
 
     const form = document.createElement("div");
 
     form.style.marginTop = "15px";
 
 
-    const codeInput = document.createElement("input");
+    const codeInput =
+        document.createElement("input");
 
     codeInput.placeholder = "股票代號";
 
 
-    const nameInput = document.createElement("input");
+    const nameInput =
+        document.createElement("input");
 
     nameInput.placeholder = "股票名稱";
 
 
-    const addButton = document.createElement("button");
+    const addButton =
+        document.createElement("button");
 
     addButton.textContent = "＋ 新增";
 
 
-    addButton.addEventListener("click", function() {
+    addButton.addEventListener(
+        "click",
+        function() {
 
-        const code = codeInput.value.trim();
-        const name = nameInput.value.trim();
+            const code =
+                codeInput.value.trim();
+
+            const name =
+                nameInput.value.trim();
 
 
-        if (code === "") {
+            if (code === "") {
 
-            alert("請輸入股票代號");
+                alert("請輸入股票代號");
 
-            return;
+                return;
+
+            }
+
+
+            stocks.push({
+
+                code: code,
+
+                name: name || "未命名"
+
+            });
+
+
+            saveStocks();
+
+            renderStocks();
+
+
+            codeInput.value = "";
+
+            nameInput.value = "";
 
         }
-
-
-        stocks.push({
-
-            code: code,
-
-            name: name || "未命名"
-
-        });
-
-
-        saveStocks();
-
-        renderStocks();
-
-
-    });
+    );
 
 
     form.appendChild(codeInput);
@@ -168,14 +231,27 @@ function renderStocks() {
 
 
 // ========================================
-// 網頁載入完成後執行
+// 網頁載入
 // ========================================
 
 document.addEventListener(
     "DOMContentLoaded",
-    function() {
+    async function() {
 
-        renderStocks();
+        // 如果瀏覽器已經有自己的自選股
+        // 就優先使用瀏覽器資料
+        const hasLocalData = loadLocalStocks();
+
+
+        if (hasLocalData) {
+
+            renderStocks();
+
+        } else {
+
+            await loadStocks();
+
+        }
 
     }
 );
