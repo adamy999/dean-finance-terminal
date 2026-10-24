@@ -182,12 +182,18 @@ async function fetchStockPrice(code) {
         }
     }
 
-    return {
-        close: close,
-        change: change,
-        percent: percent,
-        date: latest.date
-    };
+return {
+    open: latest.open == null ? null : Number(latest.open),
+    high: latest.max == null ? null : Number(latest.max),
+    low: latest.min == null ? null : Number(latest.min),
+    close: close,
+    change: change,
+    percent: percent,
+    volume: latest.Trading_Volume == null
+        ? null
+        : Number(latest.Trading_Volume),
+    date: latest.date
+};
 }
 
 
@@ -307,7 +313,16 @@ function formatPercent(value) {
 
     return sign + value.toFixed(2) + "%";
 }
+// 成交量：股數換算成張數
+function formatVolume(value) {
+    if (value === null || !Number.isFinite(value)) {
+        return "—";
+    }
 
+    return (value / 1000).toLocaleString("zh-TW", {
+        maximumFractionDigits: 1
+    });
+}
 
 // ========================================
 // 建立自選股表格
@@ -371,15 +386,19 @@ container.appendChild(titleRow);
     const table = document.createElement("table");
     table.className = "stock-table";
 
-    const headers = [
-        "代號",
-        "名稱",
-        "最新收盤",
-        "漲跌",
-        "漲幅",
-        "資料日期",
-        "操作"
-    ];
+const headers = [
+    "代號",
+    "名稱",
+    "開盤",
+    "最高",
+    "最低",
+    "最新收盤",
+    "漲跌",
+    "漲幅",
+    "成交量(張)",
+    "資料日期",
+    "操作"
+];
 
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
@@ -409,7 +428,26 @@ container.appendChild(titleRow);
         const nameCell = document.createElement("td");
         nameCell.textContent = stock.name || "未命名";
         row.appendChild(nameCell);
+        // 開盤價
+const openCell = document.createElement("td");
+openCell.textContent = quote
+    ? formatPrice(quote.open)
+    : "—";
+row.appendChild(openCell);
 
+// 最高價
+const highCell = document.createElement("td");
+highCell.textContent = quote
+    ? formatPrice(quote.high)
+    : "—";
+row.appendChild(highCell);
+
+// 最低價
+const lowCell = document.createElement("td");
+lowCell.textContent = quote
+    ? formatPrice(quote.low)
+    : "—";
+row.appendChild(lowCell);
         // 最新收盤價
         const priceCell = document.createElement("td");
 
@@ -455,7 +493,12 @@ container.appendChild(titleRow);
         }
 
         row.appendChild(percentCell);
-
+// 成交量
+const volumeCell = document.createElement("td");
+volumeCell.textContent = quote
+    ? formatVolume(quote.volume)
+    : "—";
+row.appendChild(volumeCell);
         // 資料日期
         const dateCell = document.createElement("td");
 
