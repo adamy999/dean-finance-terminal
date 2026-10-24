@@ -322,9 +322,39 @@ function renderStocks() {
 
     container.innerHTML = "";
 
-    const title = document.createElement("h3");
-    title.textContent = "我的自選股";
-    container.appendChild(title);
+// 自選股標題與更新按鈕
+const titleRow = document.createElement("div");
+
+titleRow.style.display = "flex";
+titleRow.style.justifyContent = "space-between";
+titleRow.style.alignItems = "center";
+titleRow.style.gap = "12px";
+titleRow.style.flexWrap = "wrap";
+titleRow.style.marginBottom = "12px";
+
+const title = document.createElement("h3");
+title.textContent = "我的自選股";
+title.style.margin = "0";
+
+const refreshButton = document.createElement("button");
+
+refreshButton.type = "button";
+refreshButton.className = "add-button";
+
+refreshButton.textContent = loadingPrices
+    ? "更新中…"
+    : "↻ 更新股價";
+
+refreshButton.disabled = loadingPrices;
+
+refreshButton.addEventListener("click", function() {
+    refreshPrices();
+});
+
+titleRow.appendChild(title);
+titleRow.appendChild(refreshButton);
+
+container.appendChild(titleRow);
 
     // 資料狀態說明
     const status = document.createElement("div");
