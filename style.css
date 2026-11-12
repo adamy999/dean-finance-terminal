@@ -349,3 +349,34 @@ footer {
     }
 
 }
+/* ========================================
+   V6 股票搜尋與排序
+   ======================================== */
+
+.stock-search {
+    width: 100%;
+    max-width: 320px;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin: 12px 0;
+    background: #11151d;
+    color: #e6e8ec;
+    border: 1px solid #303744;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.stock-search:focus {
+    outline: none;
+    border-color: #667085;
+}
+
+.stock-table th[title="點擊排序"] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.stock-table th[title="點擊排序"]:hover {
+    color: #ffffff;
+    background: #242a35;
+}
