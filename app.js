@@ -1,7 +1,7 @@
 // ========================================
 // DEAN FINANCE TERMINAL
-// JavaScript V4.0
-// 台股自選股 + FinMind 每日收盤資料
+// JavaScript V6.0
+// 台股自選股：搜尋 + 排序
 // ========================================
 
 const FINMIND_API =
@@ -12,7 +12,10 @@ let priceData = {};
 let priceErrors = {};
 let priceStatus = "準備載入股價資料";
 let loadingPrices = false;
-
+// V6 搜尋與排序狀態
+let stockFilter = "";
+let sortKey = "";
+let sortDirection = "asc";
 
 // ========================================
 // 日期工具：使用台灣電腦的本地日期
@@ -323,7 +326,39 @@ function formatVolume(value) {
         maximumFractionDigits: 1
     });
 }
+// ========================================
+// V6 股票排序資料
+// ========================================
 
+function getSortValue(stock, key) {
+
+    if (key === "code") {
+        return String(stock.code);
+    }
+
+    if (key === "name") {
+        return String(stock.name || "");
+    }
+
+    const quote = priceData[String(stock.code)];
+
+    if (!quote) {
+        return null;
+    }
+
+    const values = {
+        open: quote.open,
+        high: quote.high,
+        low: quote.low,
+        close: quote.close,
+        change: quote.change,
+        percent: quote.percent,
+        volume: quote.volume,
+        date: quote.date
+    };
+
+    return values[key] ?? null;
+}
 // ========================================
 // 建立自選股表格
 // ========================================
@@ -381,40 +416,153 @@ container.appendChild(titleRow);
     status.style.color = "#8b93a1";
 
     container.appendChild(status);
+// ========================================
+// V6 股票搜尋
+// ========================================
 
+const searchInput = document.createElement("input");
+
+searchInput.type = "search";
+searchInput.placeholder = "搜尋股票代號或名稱...";
+searchInput.className = "stock-search";
+searchInput.value = stockFilter;
+
+searchInput.addEventListener("input", function() {
+
+    stockFilter = searchInput.value.trim().toLowerCase();
+
+    Array.from(tbody.querySelectorAll("tr")).forEach(function(row) {
+
+        const code = row.cells[0].textContent.toLowerCase();
+        const name = row.cells[1].textContent.toLowerCase();
+
+        const matched =
+            code.includes(stockFilter) ||
+            name.includes(stockFilter);
+
+        row.style.display = matched ? "" : "none";
+
+    });
+
+});
+
+container.appendChild(searchInput);
     // 表格
     const table = document.createElement("table");
     table.className = "stock-table";
 
 const headers = [
-    "代號",
-    "名稱",
-    "開盤",
-    "最高",
-    "最低",
-    "最新收盤",
-    "漲跌",
-    "漲幅",
-    "成交量(張)",
-    "資料日期",
-    "操作"
+    { label: "代號", key: "code" },
+    { label: "名稱", key: "name" },
+    { label: "開盤", key: "open" },
+    { label: "最高", key: "high" },
+    { label: "最低", key: "low" },
+    { label: "收盤", key: "close" },
+    { label: "漲跌", key: "change" },
+    { label: "漲幅", key: "percent" },
+    { label: "成交量(張)", key: "volume" },
+    { label: "資料日期", key: "date" },
+    { label: "操作", key: null }
 ];
 
     const thead = document.createElement("thead");
     const headerRow = document.createElement("tr");
 
-    headers.forEach(function(header) {
-        const th = document.createElement("th");
-        th.textContent = header;
-        headerRow.appendChild(th);
-    });
+headers.forEach(function(header) {
+
+    const th = document.createElement("th");
+
+    th.textContent = header.label;
+
+    if (header.key) {
+
+        th.style.cursor = "pointer";
+        th.title = "點擊排序";
+
+        if (sortKey === header.key) {
+
+            th.textContent +=
+                sortDirection === "asc" ? " ▲" : " ▼";
+
+        }
+
+        th.addEventListener("click", function() {
+
+            if (sortKey === header.key) {
+
+                sortDirection =
+                    sortDirection === "asc" ? "desc" : "asc";
+
+            } else {
+
+                sortKey = header.key;
+
+                sortDirection =
+                    ["code", "name", "date"].includes(header.key)
+                    ? "asc"
+                    : "desc";
+
+            }
+
+            renderStocks();
+
+        });
+
+    }
+
+    headerRow.appendChild(th);
+
+});
 
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
 
-    stocks.forEach(function(stock) {
+// ========================================
+// V6 股票排序
+// ========================================
+
+const displayStocks = [...stocks];
+
+if (sortKey) {
+
+    displayStocks.sort(function(a, b) {
+
+        const aValue = getSortValue(a, sortKey);
+        const bValue = getSortValue(b, sortKey);
+
+        // 沒有資料的股票排在最後
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+
+        let comparison;
+
+        if (
+            typeof aValue === "number" &&
+            typeof bValue === "number"
+        ) {
+
+            comparison = aValue - bValue;
+
+        } else {
+
+            comparison = String(aValue).localeCompare(
+                String(bValue),
+                "zh-Hant"
+            );
+
+        }
+
+        return sortDirection === "asc"
+            ? comparison
+            : -comparison;
+
+    });
+
+}
+
+displayStocks.forEach(function(stock) {
         const code = String(stock.code);
         const quote = priceData[code];
         const row = document.createElement("tr");
